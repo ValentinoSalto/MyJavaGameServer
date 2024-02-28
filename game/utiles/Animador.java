@@ -34,7 +34,9 @@ public class Animador implements ApplicationListener {
 		this.filaDelSpriteSheet = filaDelSpriteSheet;
 		this.posicion = posicion;
 		FRAME_COLS = columna;
-		FRAME_ROWS = fila;	
+		FRAME_ROWS = fila;
+		
+		
 		create();
 	}
 
@@ -75,7 +77,6 @@ public class Animador implements ApplicationListener {
 
 		// Get current frame of animation for the current stateTime
 		TextureRegion currentFrame = animacion.getKeyFrame(stateTime, true);
-		
 		
 		Render.batch.draw(currentFrame, posicion.x-24, posicion.y-24,escalaX,escalaY);
 		

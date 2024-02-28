@@ -23,8 +23,7 @@ public class KnightBlue {
 	private Sprite spr;
 	private Sprite spr2;
 	private float alto, ancho;
-	
-	
+
 	private Texture textura;
 	private Animador animacionQuieto;
 	private Animador animacionIzquierda;
@@ -75,20 +74,19 @@ public class KnightBlue {
 	public boolean lastimable = false;
 	boolean bloqueoActivo;
 	boolean moverse = true;
-	private int idJugador;
-	
 	// colisiones
 	public Rectangle areaJugador;
-	public Vector2 posicion;
+	private Vector2 posicion;
 	boolean pasoPlataforma = false;
+	private boolean enRed = false;
 
-	public KnightBlue(float x, float y, float ancho, float alto, int idJugador) {
+	public KnightBlue(float x, float y, float ancho, float alto, boolean enRed) {
 		posicion = new Vector2();
 		posicion.x = x;
 		posicion.y = y;
 		this.alto = alto;
 		this.ancho = ancho;
-		this.idJugador = idJugador;
+		this.enRed = enRed;
 
 		posicion.y = 145;
 
@@ -265,65 +263,108 @@ public class KnightBlue {
 		float ANCHO = spr.getWidth();
 //		dibujarAreaInteraccion();
 
-//		moverPersonaje();
+		moverPersonaje();
 	}
 
 	public void moverPersonaje() {
-		// Maneja las entradas del teclado para cambiar el estado del personaje
-		if (Gdx.input.isKeyPressed(Keys.A) && !bloqueando && moverse /* && direccion != EstadosKnight.WALKING_LEFT */) {
-			cambiarEstado(EstadosKnight.WALKING_LEFT);
 
-		} else if (Gdx.input.isKeyPressed(Keys.D) && !bloqueando
-				&& moverse /* && direccion != EstadosKnight.WALKING_RIGHT */) {
-			cambiarEstado(EstadosKnight.WALKING_RIGHT);
+		if (!enRed) {
 
-		} else if (Gdx.input.isKeyJustPressed(Keys.SPACE) && !bloqueando) {
+			// Maneja las entradas del teclado para cambiar el estado del personaje
+			if (Gdx.input.isKeyPressed(Keys.A) && !bloqueando
+					&& moverse /* && direccion != EstadosKnight.WALKING_LEFT */) {
 
-			cambiarEstado(EstadosKnight.JUMP);
+				cambiarEstado(EstadosKnight.WALKING_LEFT);
 
-		} else if (Gdx.input.isKeyJustPressed(Keys.E)) {
-			encenderHoguera();
+			} else if (Gdx.input.isKeyPressed(Keys.A) && !bloqueando && moverse
+					&& Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) /* && direccion != EstadosKnight.WALKING_RIGHT */) {
+				cambiarEstado(EstadosKnight.RUN_LEFT);
 
-		} else if (Gdx.input.isButtonJustPressed(Buttons.LEFT)) {
+			} else if (Gdx.input.isKeyPressed(Keys.D) && !bloqueando
+					&& moverse /* && direccion != EstadosKnight.WALKING_RIGHT */) {
+				cambiarEstado(EstadosKnight.WALKING_RIGHT);
 
-			cambiarEstado(EstadosKnight.ATTACK);
-			System.out.println("ataca");
+			} else if (Gdx.input.isKeyPressed(Keys.D) && !bloqueando && moverse
+					&& Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) /* && direccion != EstadosKnight.WALKING_RIGHT */) {
+				cambiarEstado(EstadosKnight.RUN_RIGHT);
 
-		} else if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-			if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-				// Inicia la acción de bloqueo
-				bloqueoActivo = true;
-				// Cambia el estado del personaje a COVER
-				cambiarEstado(EstadosKnight.COVER);
+			} else if (Gdx.input.isKeyJustPressed(Keys.SPACE) && !bloqueando) {
 
+				cambiarEstado(EstadosKnight.JUMP);
+
+			} else if (Gdx.input.isKeyJustPressed(Keys.E)) {
+				encenderHoguera();
+
+			} else if (Gdx.input.isButtonJustPressed(Buttons.LEFT)) {
+
+				cambiarEstado(EstadosKnight.ATTACK);
+				System.out.println("ataca");
+
+			} else if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+				if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+					// Inicia la acción de bloqueo
+					bloqueoActivo = true;
+					// Cambia el estado del personaje a COVER
+					cambiarEstado(EstadosKnight.COVER);
+
+				} else {
+					// Si el clic derecho no está presionado, detiene la acción de bloqueo
+					bloqueoActivo = false;
+					// Cambia el estado del personaje a IDLE (o cualquier otro estado apropiado)
+					if (terminoSalto) {
+						cambiarEstado(EstadosKnight.IDLE);
+					}
+				}
 			} else {
-				// Si el clic derecho no está presionado, detiene la acción de bloqueo
-				bloqueoActivo = false;
-				// Cambia el estado del personaje a IDLE (o cualquier otro estado apropiado)
 				if (terminoSalto) {
 					cambiarEstado(EstadosKnight.IDLE);
+
 				}
 			}
 		} else {
-			if (terminoSalto) {
-				cambiarEstado(EstadosKnight.IDLE);
+
+			// Maneja las entradas del teclado para cambiar el estado del personaje en RED
+
+			if (Gdx.input.isKeyPressed(Keys.A)) {
+				System.out.println("moverse en red izquierda");
+				spr.setRegion(walkingLeftAnimation.getKeyFrame(time, true));
+				UtilesRed.hc.enviarMensaje("moverse#izquierda#" + UtilesRed.hc.IdCliente);
+
+			} else if (Gdx.input.isKeyPressed(Keys.A+Keys.SHIFT_LEFT) ) {
+				System.out.println("correr en red a la izquierda");
+				UtilesRed.hc.enviarMensaje("moverse#correrizquierda#" + UtilesRed.hc.IdCliente);
+
+			} else if (Gdx.input.isKeyPressed(Keys.D)) {
+				System.out.println("moverse en red derecha");
+				spr.setRegion(walkingRightAnimation.getKeyFrame(time, true));
+				UtilesRed.hc.enviarMensaje("moverse#derecha#" + UtilesRed.hc.IdCliente);
+
+			} else if (Gdx.input.isKeyPressed(Keys.D+Keys.SHIFT_LEFT)) {
+				System.out.println("correr en red a la derecha");
+				UtilesRed.hc.enviarMensaje("moverse#correrderecha#" + UtilesRed.hc.IdCliente);
+
+			} else if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+				System.out.println("moverse en red arriba");
+				UtilesRed.hc.enviarMensaje("moverse#arriba#" + UtilesRed.hc.IdCliente);
 
 			}
+
 		}
 	}
-	
-//	public void moverseRed(EstadosKnight estados) {
-//		updateAnimation(estados, Gdx.graphics.getDeltaTime());
-//	}
+
+	public void actualizarPosicionRed(float x, float y) {
+		posicion.x = x;
+		posicion.y = y;
+		spr.setPosition(posicion.x, posicion.y);
+	}
 
 	public void update() {
 
 	}
 
-	public void updateAnimation(EstadosKnight estados) {
-		float delta = Gdx.graphics.getDeltaTime();
+	public void updateAnimation(float delta) {
 
-		switch (estados) {
+		switch (estadoActual) {
 		case IDLE:
 			spr.setRegion(idleAnimation.getKeyFrame(time, true));
 			bloqueando = false;
@@ -336,25 +377,28 @@ public class KnightBlue {
 			spr.setRegion(walkingLeftAnimation.getKeyFrame(time, true));
 			posicion.x -= 3;
 			bloqueando = false;
-			if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-				spr.setRegion(runLeftAnimation.getKeyFrame(time, true));
-				cambiarEstado(EstadosKnight.RUN_LEFT);
-				posicion.x -= 6;
 
-			}
+			break;
+			
+		case RUN_LEFT:
+			spr.setRegion(runLeftAnimation.getKeyFrame(time, true));
+			posicion.x += 6;
+			bloqueando = false;
+
 			break;
 
-		case WALKING_RIGHT:
+		case WALKING_RIGHT:			
 			spr.setRegion(walkingRightAnimation.getKeyFrame(time, true));
 			posicion.x += 3;
 			bloqueando = false;
-			if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-
-				spr.setRegion(runLeftAnimation.getKeyFrame(time, true));
-				cambiarEstado(EstadosKnight.RUN_RIGHT);
-				posicion.x += 6;
-
-			}
+			
+			break;
+			
+		case RUN_RIGHT:
+			spr.setRegion(runAnimation.getKeyFrame(time, true));
+			posicion.x += 6;
+			bloqueando = false;
+			
 			break;
 
 		case JUMP:
@@ -472,8 +516,6 @@ public class KnightBlue {
 		}
 
 		areaJugador.setPosition(posicion.x, posicion.y);
-		UtilesRed.hs.enviarMensaje("seMovio#"+posicion.x+"#"+posicion.y+"#"+idJugador);
-		
 	}
 
 	public void cambiarEstado(EstadosKnight nuevoEstado) {
@@ -578,7 +620,7 @@ public class KnightBlue {
 	}
 
 	private void crearAnimacion() {
-		
+
 	}
 
 	public void setPosition(float newX, float newY) {
